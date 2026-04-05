@@ -1,5 +1,6 @@
 package-as: LFGMythicPlus
 curse-id: "1495435"
+manual-changelog: CHANGELOG.md
 
 ignore:
   - .claude
