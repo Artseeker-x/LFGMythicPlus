@@ -1,143 +1,135 @@
+<div align="center">
+
 # LFG Mythic+
 
-A World of Warcraft addon that adds a companion panel to the Blizzard Group
-Finder, giving you a real-time composition overview while you browse or form
-Mythic+ groups.
+**<font color="#4fc3f7">Live Group Scanning</font> &nbsp;·&nbsp; <font color="#81c784">Utility Coverage</font> &nbsp;·&nbsp; <font color="#ffd54f">Raid Buff Tracking</font>**
 
-## What It Does
+[![Version](https://img.shields.io/badge/Version-1.0.3-4fc3f7?style=for-the-badge&logoColor=white)](https://github.com/Artseeker-x/LFGMythicPlus/releases)
+[![WoW](https://img.shields.io/badge/WoW-Midnight-00b4d8?style=for-the-badge)](https://www.curseforge.com/wow/addons/lfg-mythic-plus)
+[![License](https://img.shields.io/badge/License-MIT-ffd54f?style=for-the-badge)](LICENSE)
+[![CurseForge](https://img.shields.io/badge/CurseForge-Download-f16436?style=for-the-badge&logo=curseforge&logoColor=white)](https://www.curseforge.com/wow/addons/lfg-mythic-plus)
 
-When you open the Group Finder (`i` or `/i`), a compact panel appears to its
-right showing:
+<br>
 
-- **Role slots** — Tank / Healer / 3× DPS with spec icon, class-colored name,
-  and specialization label for each current group member
-- **Utility coverage** — whether your group has Battle Res, Bloodlust, Interrupt,
-  Stun, Dispel, and Soothe, with contributor icons and tooltips
-- **Raid buffs** — which class buffs (Arcane Intellect, Battle Shout, Mark of the
-  Wild, Mystic Touch, Chaos Brand, etc.) are present, shown only when covered
-- **Missing-utility warnings** — small red indicators on the header when your
-  group is missing Bloodlust or Battle Res
+A lightweight companion panel for the Blizzard Group Finder.<br>
+See what your group brings, what's missing, and which raid buffs are covered — all at a glance.
 
-The panel auto-hides when you close the Group Finder. No toggle needed.
+</div>
 
-## Why Use It
+---
 
-The default Group Finder shows you names and roles but nothing about the
-utilities or buffs a composition brings. For Mythic+, knowing you have lust,
-a combat res, and a kick before you invite someone matters. This addon makes
-that information visible at a glance without leaving the Group Finder.
+## <font color="#ffb74d">LFG Mythic+</font>
 
-## Key Features
+**LFG Mythic+** enhances the default Blizzard Group Finder with a cleaner and more practical way to evaluate Mythic+ party composition while you build your group.
 
-- Anchors directly to PVEFrame — no window dragging or positioning required
-- Spec detection with GUID-keyed caching: survives roster shuffles and
-  loading-screen transitions
-- Serialized inspect queue handles party members whose spec is not yet cached,
-  with automatic retries and a safety-net revalidation every 10 seconds
-- Runtime spec discovery for specs added after the addon's static data was
-  written (new specs are picked up automatically from the game client)
-- Raider.IO compat: if Raider.IO is loaded, its profile tooltip is redirected
-  to appear to the right of this panel instead of overlapping it
-- Registered in **Settings → AddOns** under "LFG Mythic+"
+It helps you quickly understand what your group already has, what important utility is still missing, and which major raid buffs are currently covered.
 
-## Compatibility
+---
 
-- **WoW version:** Midnight (retail)
-- **Interface:** 120000 / 120001
-- **Optional dependency:** Raider.IO (tooltip positioning fix applied
-  automatically when present)
+## <font color="#64b5f6">Core Features</font>
 
-## Installation
+### <font color="#4fc3f7">Companion Panel</font>
 
-### Manual
+Adds a dedicated side panel next to the default Blizzard Group Finder so you can review party composition without replacing Blizzard's native interface.
 
-1. Download the latest release zip from the [Releases](../../releases) page
-2. Extract the `LFGMythicPlus` folder into:
-   ```
-   World of Warcraft\_retail_\Interface\AddOns\
-   ```
-3. The folder structure must be:
-   ```
-   AddOns\
-   └─ LFGMythicPlus\
-      ├─ LFGMythicPlus.toc
-      ├─ Core\
-      ├─ Data\
-      ├─ Modules\
-      ├─ UI\
-      └─ Utils\
-   ```
-4. Launch WoW or type `/reload` in-game
+### <font color="#81c784">Live Group Updates</font>
 
-### CurseForge / Wago (if listed)
+The addon scans your current 5-man party and updates live as players join, leave, or change available inspect data — giving you a reliable and responsive view of your composition while forming groups.
 
-Install via your preferred addon manager.
+### <font color="#ffd54f">Role and Spec Awareness</font>
 
-## Usage
+Shows role-based party slots with class and spec information, helping you understand what each party member contributes at a glance.
 
-1. Open the Group Finder with `i` or the social panel
-2. The LFG Mythic+ panel appears automatically to the right
-3. Hover any slot or row for a tooltip with details
-4. The panel updates live as your party composition changes
+### <font color="#ef5350">Critical Utility Warnings</font>
 
-## Slash Commands
+Displays warning indicators when your group is missing important Mythic+ tools:
+
+![Battle Res](https://img.shields.io/badge/Battle%20Res-ef5350?style=flat-square&logoColor=white)
+![Bloodlust](https://img.shields.io/badge/Bloodlust%20%2F%20Heroism%20%2F%20Time%20Warp-ef5350?style=flat-square&logoColor=white)
+
+Catch important gaps before starting a key.
+
+### <font color="#ba68c8">Tracked Utility Coverage</font>
+
+Tracks core Mythic+ utility coverage in real time:
+
+![Battle Res](https://img.shields.io/badge/Battle%20Res-ba68c8?style=flat-square&logoColor=white)
+![Bloodlust](https://img.shields.io/badge/Bloodlust-ba68c8?style=flat-square&logoColor=white)
+![Interrupt](https://img.shields.io/badge/Interrupt-ba68c8?style=flat-square&logoColor=white)
+![Stun](https://img.shields.io/badge/Stun-ba68c8?style=flat-square&logoColor=white)
+![Dispel](https://img.shields.io/badge/Dispel-ba68c8?style=flat-square&logoColor=white)
+![Soothe](https://img.shields.io/badge/Soothe-ba68c8?style=flat-square&logoColor=white)
+
+### <font color="#90a4ae">Tracked Raid Buff Coverage</font>
+
+Tracks major raid buffs provided by your current group:
+
+![Arcane Intellect](https://img.shields.io/badge/Arcane%20Intellect-546e7a?style=flat-square&logoColor=white)
+![Battle Shout](https://img.shields.io/badge/Battle%20Shout-546e7a?style=flat-square&logoColor=white)
+![Power Word: Fortitude](https://img.shields.io/badge/Power%20Word%3A%20Fortitude-546e7a?style=flat-square&logoColor=white)
+![Mark of the Wild](https://img.shields.io/badge/Mark%20of%20the%20Wild-546e7a?style=flat-square&logoColor=white)
+![Mystic Touch](https://img.shields.io/badge/Mystic%20Touch-546e7a?style=flat-square&logoColor=white)
+![Chaos Brand](https://img.shields.io/badge/Chaos%20Brand-546e7a?style=flat-square&logoColor=white)
+![Hunter's Mark](https://img.shields.io/badge/Hunter's%20Mark-546e7a?style=flat-square&logoColor=white)
+![Devotion Aura](https://img.shields.io/badge/Devotion%20Aura-546e7a?style=flat-square&logoColor=white)
+![Skyfury](https://img.shields.io/badge/Skyfury-546e7a?style=flat-square&logoColor=white)
+![Blessing of the Bronze](https://img.shields.io/badge/Blessing%20of%20the%20Bronze-546e7a?style=flat-square&logoColor=white)
+![Atrophic Poison](https://img.shields.io/badge/Atrophic%20Poison-546e7a?style=flat-square&logoColor=white)
+
+### <font color="#4db6ac">Spec-Aware Scanning</font>
+
+Uses inspect handling and retry logic to improve class and specialization accuracy while building your group.
+
+### <font color="#9575cd">Automatic Panel Behavior</font>
+
+The addon opens alongside the Blizzard Group Finder window, making it feel like a natural extension of the default LFG experience.
+
+---
+
+## <font color="#64b5f6">Slash Commands</font>
+
+> **Access:** `/lfgmp` — `/lfgmythicplus` also works as a full alias
 
 | Command | Effect |
 |---|---|
-| `/lfgmp` | Show command list |
-| `/lfgmp warnings` | Toggle missing-utility indicators (Bloodlust / Brez) |
-| `/lfgmp reset` | Reset all settings to defaults |
-| `/lfgmp debug` | Toggle debug output to chat |
+| **<font color="#4fc3f7">/lfgmp warnings</font>** | Toggle missing utility warning indicators |
+| **<font color="#81c784">/lfgmp reset</font>** | Reset addon settings to defaults |
+| **<font color="#ffd54f">/lfgmp debug</font>** | Toggle debug output to chat |
 
-`/lfgmythicplus` is also registered as a full-length alias.
+---
 
-## Screenshots
+## <font color="#ffb74d">Why Use It</font>
 
-<!-- Add screenshots here -->
+- Build stronger Mythic+ groups faster
+- See missing utility at a glance
+- Keep the Blizzard default LFG experience, but with better composition awareness
+- Reduce guesswork when deciding the next invite
+- Improve group planning without replacing Blizzard's native LFG tools
 
-## Known Limitations
+---
 
-- **Party only.** The addon tracks groups of up to 5. It does not show
-  composition data for raids.
-- **Spec detection requires proximity.** WoW's inspect API only works when the
-  target is within render range. Party members outside range show a "Loading
-  specs..." indicator until they are visible.
-- **No LFG applicant scanning.** The panel shows your current party, not the
-  list of players applying to your group in the LFG browser.
+## <font color="#ffb74d">Feedback, Suggestions & Bug Reports</font>
 
-## Roadmap
+If you have **ideas, feedback, suggestions, or bug reports**, or want a better way to communicate and follow development, feel free to join my **Discord** linked on my profile.
 
-- [ ] Highlight duplicate raid buffs (e.g., two Mages, zero Priests)
-- [ ] Applicant preview: show a composition preview when hovering an applicant
-      in the LFG browser
-- [ ] Optional minimap button
+It's the best place for:
 
-## Bug Reports
+- Clear back-and-forth communication
+- Tracking known issues and updates
+- Sharing ideas and experiments
 
-Please open an issue on GitHub with:
+Everyone's welcome.
 
-- A description of what happened vs. what you expected
-- Your WoW patch version (from the character select screen)
-- Any error text from the WoW error frame or BugSack
-- Whether the bug is reproducible and under what conditions
+---
 
-## Contributing
+<div align="center">
 
-Pull requests are welcome. Before contributing:
+## <font color="#f06292">Support the Project</font>
 
-1. Keep changes scoped — one concern per PR
-2. Do not touch the UtilityMatrix or ClassSpecData unless you have verified the
-   change in-game and cited the source (Wowhead, WoWDB, or PTR testing)
-3. Do not introduce Lua globals — everything lives under the `LFGMythicPlus`
-   namespace table
-4. Test with and without Raider.IO loaded
+If you enjoy **LFG Mythic+** and want to support ongoing development:
 
-## Credits
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Artseeker-ff5e5b?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/artseeker)
+[![Patreon](https://img.shields.io/badge/Patreon-Support%20Artseeker-f96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Artseeker_)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/vPYXyBgMBW)
 
-Built by **Artseeker**.
-
-Uses only Blizzard's public addon APIs. No libraries required.
-
-## License
-
-[MIT](LICENSE)
+</div>
