@@ -5,6 +5,7 @@
 ## Version: 1.0.3
 ## X-Category: Group & Raid
 ## X-License: MIT
+## X-Curse-Project-ID: 1495435
 ## SavedVariables: LFGMythicPlusDB
 ## IconTexture: 525134
 ## DefaultState: enabled
