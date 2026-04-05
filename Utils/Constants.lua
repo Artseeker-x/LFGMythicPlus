@@ -8,7 +8,7 @@ local ADDON_NAME, NS = ...
 NS.CONSTANTS = {
     -- Addon identity
     ADDON_NAME     = ADDON_NAME,
-    ADDON_VERSION  = "1.0.2",
+    ADDON_VERSION  = "1.0.3",
 
     -- Role keys (match Blizzard role strings)
     ROLE_TANK    = "TANK",

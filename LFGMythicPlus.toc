@@ -2,7 +2,7 @@
 ## Title: |cffFFD100LFG Mythic+|r
 ## Notes: Companion panel for Mythic+ group forming. Shows role composition, utility coverage (brez, lust, kick, stun, dispel, soothe), and raid buff tracking alongside the Group Finder.
 ## Author: Artseeker
-## Version: 1.0.2
+## Version: 1.0.3
 ## X-Category: Group & Raid
 ## X-License: MIT
 ## SavedVariables: LFGMythicPlusDB

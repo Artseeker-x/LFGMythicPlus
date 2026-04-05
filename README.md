@@ -42,7 +42,7 @@ that information visible at a glance without leaving the Group Finder.
 
 ## Compatibility
 
-- **WoW version:** The War Within (retail)
+- **WoW version:** Midnight (retail)
 - **Interface:** 120000 / 120001
 - **Optional dependency:** Raider.IO (tooltip positioning fix applied
   automatically when present)
