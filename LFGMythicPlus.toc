@@ -1,0 +1,39 @@
+## Interface: 120000, 120001
+## Title: |cffFFD100LFG Mythic+|r
+## Notes: Companion panel for Mythic+ group forming. Shows role composition, utility coverage (brez, lust, kick, stun, dispel, soothe), and raid buff tracking alongside the Group Finder.
+## Author: Artseeker
+## Version: 1.0.2
+## X-Category: Group & Raid
+## X-License: MIT
+## SavedVariables: LFGMythicPlusDB
+## IconTexture: 525134
+## DefaultState: enabled
+
+# Utils - helpers loaded first, no dependencies
+Utils\Constants.lua
+Utils\API.lua
+Utils\Debug.lua
+
+# Core - addon lifecycle and state
+Core\Init.lua
+Core\SavedVariables.lua
+Core\Events.lua
+Core\State.lua
+
+# Data - static mappings
+Data\ClassSpecData.lua
+Data\UtilityMatrix.lua
+
+# Modules - logic
+Modules\GroupScanner.lua
+Modules\CompEvaluator.lua
+Modules\LFGBridge.lua
+Modules\RaiderIOCompat.lua
+
+# UI - frames and rendering
+UI\MainWindow.lua
+UI\Layout.lua
+UI\RoleSlots.lua
+UI\UtilityRows.lua
+UI\Warnings.lua
+UI\OptionsPanel.lua

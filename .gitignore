@@ -1,0 +1,37 @@
+# Claude Code project settings (local only)
+.claude/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temp / backup files
+*.bak
+*.tmp
+*.orig
+*.log
+
+# Packaging artifacts
+*.zip
+*.tar.gz
+release/
+dist/
+.release/
+
+# BigWigs Packager / CurseForge CI artifacts
+.pkgmeta
+/nolib/
+
+# luacheck / linting
+.luacheckrc
+
+# Local test / dev overrides
+dev/
