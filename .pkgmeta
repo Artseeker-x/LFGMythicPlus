@@ -1,0 +1,8 @@
+package-as: LFGMythicPlus
+curse-id: "1495435"
+
+ignore:
+  - .claude
+  - .github
+  - .gitignore
+  - .pkgmeta

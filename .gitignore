@@ -26,8 +26,7 @@ release/
 dist/
 .release/
 
-# BigWigs Packager / CurseForge CI artifacts
-.pkgmeta
+# BigWigs Packager output artifacts
 /nolib/
 
 # luacheck / linting
