@@ -1,9 +1,10 @@
 package-as: LFGMythicPlus
 curse-id: 1495435
-manual-changelog: CHANGELOG.md
+manual-changelog: RELEASE_NOTES.md
 
 ignore:
   - .claude
   - .github
   - .gitignore
   - .pkgmeta
+  - RELEASE_NOTES.md
