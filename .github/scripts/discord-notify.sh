@@ -4,7 +4,6 @@ set -euo pipefail
 # Version: prefer explicit override (manual trigger), fall back to git tag
 if [ -n "${NOTIFY_VERSION:-}" ]; then
     VERSION="$NOTIFY_VERSION"
-    # Read RELEASE_NOTES.md from the specific version tag so notes are always accurate
     git show "v${VERSION}:RELEASE_NOTES.md" > /tmp/release_notes.md 2>/dev/null \
         && NOTES_FILE="/tmp/release_notes.md" \
         || NOTES_FILE="RELEASE_NOTES.md"
@@ -21,12 +20,33 @@ grep -q "^### Changed" "$NOTES_FILE" && TYPE="${TYPE:+$TYPE / }update"
 grep -q "^### Removed" "$NOTES_FILE" && TYPE="${TYPE:+$TYPE / }cleanup"
 [ -z "$TYPE" ] && TYPE="update"
 
-# Get the CurseForge file ID for this specific version
-CF_FILE_ID=$(curl -s \
+# Fetch all recent CurseForge files once
+CF_API_RESPONSE=$(curl -s \
   -H "x-api-key: ${CF_API_KEY}" \
-  "https://api.curseforge.com/v1/mods/1495435/files?pageSize=10&sortOrder=desc" \
-  | jq -r --arg ver "$VERSION" '[.data[] | select(.displayName | test($ver))] | .[0].id')
-CF_URL="https://www.curseforge.com/wow/addons/lfg-mythic/files/${CF_FILE_ID}"
+  "https://api.curseforge.com/v1/mods/1495435/files?pageSize=50&sortOrder=desc")
+
+# Search by version string in both fileName and displayName using contains()
+# (avoids regex dot-as-wildcard issues with version numbers like "1.0.4")
+CF_FILE_ID=$(echo "$CF_API_RESPONSE" | jq -r --arg ver "$VERSION" '
+  [ .data[]?
+    | select(
+        (.fileName    // "" | contains($ver)) or
+        (.displayName // "" | contains($ver))
+      )
+  ] | first | .id // ""')
+
+# If version search found nothing, fall back to the newest file
+# (for automatic tag-push releases the packager just uploaded it)
+if [ -z "$CF_FILE_ID" ] || [ "$CF_FILE_ID" = "null" ]; then
+    CF_FILE_ID=$(echo "$CF_API_RESPONSE" | jq -r '.data[0].id // ""')
+fi
+
+# Build URLs — fall back to the addon page if file ID still unresolvable
+if [ -n "$CF_FILE_ID" ] && [ "$CF_FILE_ID" != "null" ]; then
+    CF_URL="https://www.curseforge.com/wow/addons/lfg-mythic/files/${CF_FILE_ID}"
+else
+    CF_URL="https://www.curseforge.com/wow/addons/lfg-mythic"
+fi
 GH_URL="https://github.com/Artseeker-x/LFGMythicPlus/releases/tag/v${VERSION}"
 
 # Format notes: bullets, auto-bold key terms
