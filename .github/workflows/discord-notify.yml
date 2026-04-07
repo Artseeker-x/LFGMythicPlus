@@ -14,7 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: v${{ inputs.version }}
+          ref: main
+          fetch-depth: 0
 
       - name: Send Discord Notification
         env:

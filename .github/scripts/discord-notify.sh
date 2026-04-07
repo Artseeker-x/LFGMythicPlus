@@ -4,16 +4,21 @@ set -euo pipefail
 # Version: prefer explicit override (manual trigger), fall back to git tag
 if [ -n "${NOTIFY_VERSION:-}" ]; then
     VERSION="$NOTIFY_VERSION"
+    # Read $NOTES_FILE from the specific version tag, not from main
+    git show "v${VERSION}:$NOTES_FILE" > /tmp/release_notes.md 2>/dev/null \
+        && NOTES_FILE="/tmp/release_notes.md" \
+        || NOTES_FILE="$NOTES_FILE"
 else
     VERSION="${GITHUB_REF_NAME#v}"
+    NOTES_FILE="$NOTES_FILE"
 fi
 
-# Detect release type from RELEASE_NOTES.md section headers
+# Detect release type from $NOTES_FILE section headers
 TYPE=""
-grep -q "^### Added"   RELEASE_NOTES.md && TYPE="${TYPE:+$TYPE / }feature"
-grep -q "^### Fixed"   RELEASE_NOTES.md && TYPE="${TYPE:+$TYPE / }fix"
-grep -q "^### Changed" RELEASE_NOTES.md && TYPE="${TYPE:+$TYPE / }update"
-grep -q "^### Removed" RELEASE_NOTES.md && TYPE="${TYPE:+$TYPE / }cleanup"
+grep -q "^### Added"   $NOTES_FILE && TYPE="${TYPE:+$TYPE / }feature"
+grep -q "^### Fixed"   $NOTES_FILE && TYPE="${TYPE:+$TYPE / }fix"
+grep -q "^### Changed" $NOTES_FILE && TYPE="${TYPE:+$TYPE / }update"
+grep -q "^### Removed" $NOTES_FILE && TYPE="${TYPE:+$TYPE / }cleanup"
 [ -z "$TYPE" ] && TYPE="update"
 
 # Get the CurseForge file ID for this specific version
@@ -25,7 +30,7 @@ CF_URL="https://www.curseforge.com/wow/addons/lfg-mythic/files/${CF_FILE_ID}"
 GH_URL="https://github.com/Artseeker-x/LFGMythicPlus/releases/tag/v${VERSION}"
 
 # Format notes for embed description: bullets, auto-bold key terms
-NOTES=$(grep "^- " RELEASE_NOTES.md \
+NOTES=$(grep "^- " $NOTES_FILE \
   | sed \
       -e 's/^- /• /' \
       -e 's/Raider\.IO/**Raider.IO**/g' \
