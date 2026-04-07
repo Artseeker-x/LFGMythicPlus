@@ -1,3 +1,4 @@
-### Fixed
-- Hardened compatibility with Raider.IO tooltip overlap, which was causing UI conflicts over the LFG Mythic+ window
-- Added extra protection to reduce the chance of future tooltip layering / frame overlap issues
+### Changed
+- Full codebase comment cleanup across all 19 Lua source files: removed development-era commentary, redundant section banners, narration comments, and historical patch notes
+- Retained only technically necessary comments covering non-obvious WoW API behavior (GUID cache, serialized inspect queue, stale cross-class spec data, Raider.IO anchor redirect)
+- No behavior changes

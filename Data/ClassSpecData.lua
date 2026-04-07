@@ -1,29 +1,14 @@
-------------------------------------------------------------------------
--- Data/ClassSpecData.lua
--- Static mapping of specID -> { class, spec name, role, icon }.
--- Fallback source of truth for retail specs. Init.lua updates icons and
--- discovers new specs (e.g. DH Devourer) from the live game client at
--- load time, so stale entries here are harmless — they get overwritten.
--- UtilityMatrix.lua references specIDs defined here.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local CSD = {}
 NS.ClassSpecData = CSD
 
-------------------------------------------------------------------------
--- Role icons (Blizzard atlas keys)
-------------------------------------------------------------------------
 CSD.ROLE_ICONS = {
     TANK    = "roleicon-tank",
     HEALER  = "roleicon-healer",
     DAMAGER = "roleicon-dps",
 }
 
-------------------------------------------------------------------------
--- specID -> static info
--- Fields: class (file token), name, role, icon (texture ID)
-------------------------------------------------------------------------
 CSD.Specs = {
     -- Death Knight
     [250]  = { class = "DEATHKNIGHT", name = "Blood",         role = "TANK",    icon = 135770 },
@@ -32,8 +17,6 @@ CSD.Specs = {
     -- Demon Hunter
     [577]  = { class = "DEMONHUNTER", name = "Havoc",         role = "DAMAGER", icon = 1247264 },
     [581]  = { class = "DEMONHUNTER", name = "Vengeance",     role = "TANK",    icon = 1247265 },
-    -- (Devourer is discovered at runtime by Init.lua's Phase 2 loop or
-    --  by EnsureSpec when a player with that spec is first encountered.)
     -- Druid
     [102]  = { class = "DRUID",       name = "Balance",       role = "DAMAGER", icon = 136096 },
     [103]  = { class = "DRUID",       name = "Feral",         role = "DAMAGER", icon = 132115 },
@@ -81,10 +64,6 @@ CSD.Specs = {
     [73]   = { class = "WARRIOR",     name = "Protection",    role = "TANK",    icon = 132341 },
 }
 
-------------------------------------------------------------------------
--- Class color table (Blizzard RAID_CLASS_COLORS is available at runtime
--- but we store fallback hex values for tooltip / string use)
-------------------------------------------------------------------------
 CSD.ClassColors = {
     DEATHKNIGHT = "C41E3A",
     DEMONHUNTER = "A330C9",
@@ -101,23 +80,16 @@ CSD.ClassColors = {
     WARRIOR     = "C69B6D",
 }
 
-------------------------------------------------------------------------
--- Class token comparison.
--- Handles the DEMONHUNTER vs DEMON_HUNTER (and similar) edge case
--- where different Blizzard APIs may return different formatting for the
--- same class. Strips underscores before comparing.
-------------------------------------------------------------------------
+-- DEMONHUNTER vs DEMON_HUNTER: different Blizzard APIs return different formats.
+-- Strip underscores before comparing.
 local function ClassMatch(a, b)
     if a == b then return true end
     if not a or not b then return false end
     return a:gsub("_", "") == b:gsub("_", "")
 end
 
-CSD.ClassMatch = ClassMatch  -- exposed for tests, not for general use
+CSD.ClassMatch = ClassMatch
 
-------------------------------------------------------------------------
--- Helpers
-------------------------------------------------------------------------
 function CSD:GetSpecInfo(specID)
     return self.Specs[specID]
 end
@@ -126,7 +98,6 @@ function CSD:GetClassColor(classFile)
     if self.ClassColors[classFile] then
         return self.ClassColors[classFile]
     end
-    -- Fallback: try without underscores (DEMON_HUNTER -> DEMONHUNTER)
     local stripped = classFile and classFile:gsub("_", "") or nil
     if stripped and self.ClassColors[stripped] then
         return self.ClassColors[stripped]
@@ -134,33 +105,24 @@ function CSD:GetClassColor(classFile)
     return "CCCCCC"
 end
 
-------------------------------------------------------------------------
--- Runtime spec discovery.
--- When the addon encounters a specID not in the static table (e.g. the
--- new DH Devourer spec), this resolves it from the live game API, adds
--- it to CSD.Specs, seeds the UtilityMatrix with class-level guaranteed
--- utilities, and ensures ClassColors has an entry.
---
--- If expectedClassFile is provided, the spec must belong to that class
--- or nil is returned (prevents accepting stale cross-class inspect data).
-------------------------------------------------------------------------
+-- Resolve a specID from the live game API if not in the static table.
+-- If expectedClassFile is provided, rejects specs that don't match (guards against
+-- stale cross-class inspect data).
 function CSD:EnsureSpec(specID, expectedClassFile)
     local info = self.Specs[specID]
     if info then
-        -- Existing entry: validate class if requested
         if expectedClassFile and not ClassMatch(info.class, expectedClassFile) then
             return nil
         end
         return info
     end
 
-    -- Not in static data — try to resolve from the game API
     if not GetSpecializationInfoByID then return nil end
 
     local a, b, _, d, e, f = GetSpecializationInfoByID(specID)
     local sName, sIcon, sRole, sClassFile
     if type(a) == "table" then
-        -- Struct return (some 12.0+ API versions)
+        -- Struct return (WoW 12.0+)
         sName      = a.name or a.specName
         sIcon      = a.iconID or a.icon
         sRole      = a.role
@@ -178,7 +140,6 @@ function CSD:EnsureSpec(specID, expectedClassFile)
         return nil
     end
 
-    -- Create the spec entry
     self.Specs[specID] = {
         class = sClassFile,
         name  = sName or ("Spec " .. specID),
@@ -186,7 +147,6 @@ function CSD:EnsureSpec(specID, expectedClassFile)
         icon  = (sIcon and sIcon ~= 0) and sIcon or 0,
     }
 
-    -- Ensure ClassColors has an entry for this class token
     if not self.ClassColors[sClassFile] then
         local rc = RAID_CLASS_COLORS and RAID_CLASS_COLORS[sClassFile]
         if rc then
@@ -199,7 +159,6 @@ function CSD:EnsureSpec(specID, expectedClassFile)
         end
     end
 
-    -- Seed UtilityMatrix with class-level guaranteed utilities
     local UM = NS.UtilityMatrix
     if UM and not UM.Matrix[specID] then
         local seed = self:BuildClassUtilitySeed(sClassFile, specID)
@@ -213,11 +172,9 @@ function CSD:EnsureSpec(specID, expectedClassFile)
     return self.Specs[specID]
 end
 
-------------------------------------------------------------------------
--- Compute the intersection of all UM.Matrix entries for a given class.
--- Returns a table of utility keys that EVERY known spec of the class
--- provides, or nil if empty. Used to seed UM.Matrix for new specs.
-------------------------------------------------------------------------
+-- Intersect UM.Matrix entries for all known specs of a class.
+-- Returns keys every spec of the class shares, or nil if empty.
+-- Used to seed UM.Matrix for newly discovered specs.
 function CSD:BuildClassUtilitySeed(classFile, excludeSpecID)
     local UM = NS.UtilityMatrix
     if not UM or not UM.Matrix then return nil end

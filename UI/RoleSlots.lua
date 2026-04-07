@@ -1,9 +1,3 @@
-------------------------------------------------------------------------
--- UI/RoleSlots.lua
--- Renders 5 party member slots: role icon, spec icon, class-colored
--- name. Slots have subtle hover highlights and alternating backgrounds.
--- Handles pending-inspect, empty, and overflow members gracefully.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local RS = {}
@@ -20,19 +14,14 @@ local SLOT_LABELS = { "Tank", "Healer", "DPS", "DPS", "DPS" }
 
 RS.slots = {}
 
-------------------------------------------------------------------------
--- Initialize
-------------------------------------------------------------------------
 function RS:Initialize(parent)
     self.anchor = parent
 
-    -- Section header
     local header = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     header:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2)
     header:SetTextColor(C.COLOR_HEADER.r, C.COLOR_HEADER.g, C.COLOR_HEADER.b)
     self.header = header
 
-    -- Separator below header
     local sep = parent:CreateTexture(nil, "ARTWORK")
     sep:SetTexture("Interface\\Buttons\\WHITE8x8")
     sep:SetVertexColor(0.35, 0.35, 0.45, 0.5)
@@ -40,15 +29,11 @@ function RS:Initialize(parent)
     sep:SetPoint("TOPLEFT", header, "BOTTOMLEFT", -2, -3)
     sep:SetPoint("RIGHT", parent, "RIGHT", -2, 0)
 
-    -- Slot frames below header (header ~12px + sep + padding = ~18px)
     for i = 1, 5 do
         self.slots[i] = self:CreateSlot(parent, i)
     end
 end
 
-------------------------------------------------------------------------
--- Create a single slot row
-------------------------------------------------------------------------
 function RS:CreateSlot(parent, index)
     local topOffset = -18 - ((index - 1) * (SLOT_HEIGHT + 2))
 
@@ -57,7 +42,6 @@ function RS:CreateSlot(parent, index)
     slot:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, topOffset)
     slot:SetPoint("RIGHT", parent, "RIGHT", 0, 0)
 
-    -- Alternating row background for readability
     local bg = slot:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints()
     bg:SetTexture("Interface\\Buttons\\WHITE8x8")
@@ -68,26 +52,22 @@ function RS:CreateSlot(parent, index)
     end
     slot.bg = bg
 
-    -- Hover highlight
     slot:EnableMouse(true)
     local highlight = slot:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetAllPoints()
     highlight:SetTexture("Interface\\Buttons\\WHITE8x8")
     highlight:SetVertexColor(1, 1, 1, 0.06)
 
-    -- Role icon
     local roleIcon = slot:CreateTexture(nil, "ARTWORK")
     roleIcon:SetSize(ICON_SIZE, ICON_SIZE)
     roleIcon:SetPoint("LEFT", slot, "LEFT", 4, 0)
     slot.roleIcon = roleIcon
 
-    -- Spec icon
     local specIcon = slot:CreateTexture(nil, "ARTWORK")
     specIcon:SetSize(ICON_SIZE, ICON_SIZE)
     specIcon:SetPoint("LEFT", roleIcon, "RIGHT", 3, 0)
     slot.specIcon = specIcon
 
-    -- Name + spec text
     local nameText = slot:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     nameText:SetPoint("LEFT", specIcon, "RIGHT", 4, 0)
     nameText:SetPoint("RIGHT", slot, "RIGHT", -4, 0)
@@ -95,7 +75,6 @@ function RS:CreateSlot(parent, index)
     nameText:SetWordWrap(false)
     slot.nameText = nameText
 
-    -- Tooltip showing spec details on hover
     slot:SetScript("OnEnter", function(frame)
         local member = frame.memberData
         if not member then return end
@@ -105,7 +84,6 @@ function RS:CreateSlot(parent, index)
         if member.specInfo then
             GameTooltip:AddLine(member.specInfo.name .. " " .. member.classFile:sub(1,1) .. member.classFile:sub(2):lower(), 0.7, 0.7, 0.7)
         end
-        -- List utilities this member provides
         if member.specID then
             local utils = NS.UtilityMatrix:GetUtilities(member.specID)
             local utilList = {}
@@ -117,7 +95,6 @@ function RS:CreateSlot(parent, index)
             if #utilList > 0 then
                 GameTooltip:AddLine("Utility: " .. table.concat(utilList, ", "), 0.5, 0.8, 0.5)
             end
-            -- List raid buffs
             local buffList = {}
             for _, key in ipairs(C.BUFF_ORDER) do
                 if utils[key] then
@@ -128,7 +105,6 @@ function RS:CreateSlot(parent, index)
                 GameTooltip:AddLine("Buffs: " .. table.concat(buffList, ", "), 0.5, 0.7, 0.9)
             end
         elseif member.classFile then
-            -- Spec unknown: show class-guaranteed contributions
             local classUtils = NS.UtilityMatrix:GetClassUtilities(member.classFile)
             if classUtils then
                 local items = {}
@@ -150,18 +126,13 @@ function RS:CreateSlot(parent, index)
     return slot
 end
 
-------------------------------------------------------------------------
--- Update all 5 slots from State
-------------------------------------------------------------------------
 function RS:Update()
     self.header:SetText(string.format(
         "Group  |cffaaaaaa(%d/5)|r",
         State.memberCount
     ))
 
-    -- Sort members into role buckets.
-    -- NONE-role members (no group role assigned) use their spec's role,
-    -- falling back to DPS if unknown.
+    -- NONE-role members (freshly invited, no assignment yet) fall back to spec role.
     local tank, healer, dps = {}, {}, {}
     for _, member in pairs(State.members) do
         local role = member.role
@@ -177,7 +148,6 @@ function RS:Update()
         end
     end
 
-    -- Build ordered display: tank, healer, dps x3
     local display = { tank[1], healer[1], dps[1], dps[2], dps[3] }
 
     for i = 1, 5 do
@@ -185,13 +155,9 @@ function RS:Update()
     end
 end
 
-------------------------------------------------------------------------
--- Update a single slot
-------------------------------------------------------------------------
 function RS:UpdateSlot(slot, member, index)
     if not slot then return end
 
-    -- Store member ref for tooltip
     slot.memberData = member
 
     local expectedRole = SLOT_ORDER[index]

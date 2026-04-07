@@ -1,15 +1,3 @@
-------------------------------------------------------------------------
--- UI/UtilityRows.lua
--- Renders two sections: Utility Coverage (6 rows, always visible) and
--- Raid Buffs (0-11 rows, only visible when covered by a party member).
---
--- Utility rows always show — uncovered ones are greyed out as before.
--- Buff rows are hidden when no party member provides them, and
--- dynamically repositioned on each update to stack without gaps.
---
--- Both sections read from the same State.utilities table, populated
--- by CompEvaluator:Evaluate() on every scan cycle.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local UR = {}
@@ -25,15 +13,12 @@ local ICON_SIZE         = 14
 local CONTRIB_ICON_SIZE = 13
 local MAX_CONTRIB_ICONS = 5
 local HEADER_HEIGHT     = 16
-local HEADER_GAP        = 4  -- space below header + separator
-local SECTION_GAP       = 4  -- gap between sections
+local HEADER_GAP        = 4
+local SECTION_GAP       = 4
 
-UR.utilRows = {}   -- utility row frames (always visible)
-UR.buffRows = {}   -- buff row frames (visibility driven by coverage)
+UR.utilRows = {}
+UR.buffRows = {}
 
-------------------------------------------------------------------------
--- Section definitions
-------------------------------------------------------------------------
 local utilSection = {
     header  = "Utility Coverage",
     order   = C.UTILITY_ORDER,
@@ -50,18 +35,12 @@ local buffSection = {
     isBuff  = true,
 }
 
-------------------------------------------------------------------------
--- Initialize
-------------------------------------------------------------------------
 function UR:Initialize(parent)
     self.anchor = parent
 
     local yPos = 0
 
-    ----------------------------------------------------------------
-    -- Utility section (always visible, all 6 rows)
-    ----------------------------------------------------------------
-    -- Header line frame (used as anchor for warning indicators)
+    -- Header line frame doubles as the anchor point for Warnings indicators.
     local uHeaderLine = CreateFrame("Frame", nil, parent)
     uHeaderLine:SetHeight(HEADER_HEIGHT)
     uHeaderLine:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yPos)
@@ -88,11 +67,8 @@ function UR:Initialize(parent)
     end
 
     yPos = yPos + #C.UTILITY_ORDER * (ROW_HEIGHT + ROW_GAP)
-    self.utilSectionBottom = yPos  -- Y offset where utility section ends
+    self.utilSectionBottom = yPos
 
-    ----------------------------------------------------------------
-    -- Buff section (header + rows created once, visibility dynamic)
-    ----------------------------------------------------------------
     local bHeader = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     bHeader:SetText(buffSection.header)
     bHeader:SetTextColor(C.COLOR_HEADER.r, C.COLOR_HEADER.g, C.COLOR_HEADER.b)
@@ -106,7 +82,6 @@ function UR:Initialize(parent)
     bSep:Hide()
     self.buffSep = bSep
 
-    -- Create all buff row frames (hidden by default)
     for i, key in ipairs(C.BUFF_ORDER) do
         local row = self:CreateRow(parent, key, 0, #C.UTILITY_ORDER + i, buffSection)
         row:Hide()
@@ -114,9 +89,6 @@ function UR:Initialize(parent)
     end
 end
 
-------------------------------------------------------------------------
--- Create a single row frame (shared by both sections)
-------------------------------------------------------------------------
 function UR:CreateRow(parent, key, yOffset, globalIndex, section)
     local row = CreateFrame("Frame", nil, parent)
     row:SetHeight(ROW_HEIGHT)
@@ -125,7 +97,6 @@ function UR:CreateRow(parent, key, yOffset, globalIndex, section)
     row.utilKey = key
     row.section = section
 
-    -- Alternating background
     local bg = row:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints()
     bg:SetTexture("Interface\\Buttons\\WHITE8x8")
@@ -136,28 +107,24 @@ function UR:CreateRow(parent, key, yOffset, globalIndex, section)
     end
     row.bg = bg
 
-    -- Coverage tint overlay (very subtle green or red)
     local tint = row:CreateTexture(nil, "BACKGROUND", nil, 1)
     tint:SetAllPoints()
     tint:SetTexture("Interface\\Buttons\\WHITE8x8")
     tint:SetAlpha(0)
     row.tint = tint
 
-    -- Hover highlight
     row:EnableMouse(true)
     local highlight = row:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetAllPoints()
     highlight:SetTexture("Interface\\Buttons\\WHITE8x8")
     highlight:SetVertexColor(1, 1, 1, 0.06)
 
-    -- Icon
     local icon = row:CreateTexture(nil, "ARTWORK")
     icon:SetSize(ICON_SIZE, ICON_SIZE)
     icon:SetPoint("LEFT", row, "LEFT", 4, 0)
     icon:SetTexture(section.icons[key])
     row.icon = icon
 
-    -- Label
     local label = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label:SetPoint("LEFT", icon, "RIGHT", 5, 0)
     label:SetPoint("RIGHT", row, "RIGHT", -50, 0)
@@ -166,12 +133,10 @@ function UR:CreateRow(parent, key, yOffset, globalIndex, section)
     label:SetText(section.labels[key])
     row.label = label
 
-    -- Status text (right edge)
     local status = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     status:SetPoint("RIGHT", row, "RIGHT", -6, 0)
     row.status = status
 
-    -- Contributor spec icons (anchored right-to-left from status)
     row.contribIcons = {}
     for ci = 1, MAX_CONTRIB_ICONS do
         local tex = row:CreateTexture(nil, "ARTWORK")
@@ -180,7 +145,6 @@ function UR:CreateRow(parent, key, yOffset, globalIndex, section)
         row.contribIcons[ci] = tex
     end
 
-    -- Tooltip
     row:SetScript("OnEnter", function(rowFrame)
         local rKey = rowFrame.utilKey
         local rSection = rowFrame.section
@@ -189,7 +153,6 @@ function UR:CreateRow(parent, key, yOffset, globalIndex, section)
         GameTooltip:SetOwner(rowFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText(rSection.labels[rKey] or rKey, 1, 0.82, 0)
 
-        -- Buff description (what the buff does)
         if rSection.isBuff and C.BUFF_DESCRIPTIONS and C.BUFF_DESCRIPTIONS[rKey] then
             GameTooltip:AddLine(C.BUFF_DESCRIPTIONS[rKey], 0.75, 0.75, 0.75, true)
         end
@@ -220,18 +183,11 @@ function UR:CreateRow(parent, key, yOffset, globalIndex, section)
     return row
 end
 
-------------------------------------------------------------------------
--- Update: refresh all rows from current State.
--- Utility rows: always visible, grey when uncovered.
--- Buff rows: hidden when uncovered, dynamically repositioned.
-------------------------------------------------------------------------
 function UR:Update()
-    -- 1. Update utility rows (always visible)
     for _, row in ipairs(self.utilRows) do
         self:ApplyRowState(row)
     end
 
-    -- 2. Determine which buff rows are covered
     local visibleBuffs = {}
     for _, row in ipairs(self.buffRows) do
         if State:IsUtilityCovered(row.utilKey) then
@@ -239,14 +195,12 @@ function UR:Update()
         end
     end
 
-    -- 3. Hide all buff rows first
     for _, row in ipairs(self.buffRows) do
         row:Hide()
     end
 
     local hasBuffs = #visibleBuffs > 0
 
-    -- 4. Show/hide buff section header
     if hasBuffs then
         self.buffHeader:Show()
         self.buffSep:Show()
@@ -255,11 +209,9 @@ function UR:Update()
         self.buffSep:Hide()
     end
 
-    -- 5. Reposition visible buff rows and the header
     local yPos = self.utilSectionBottom + SECTION_GAP
 
     if hasBuffs then
-        -- Position buff header
         self.buffHeader:ClearAllPoints()
         self.buffHeader:SetPoint("TOPLEFT", self.anchor, "TOPLEFT", 2, -yPos - 2)
 
@@ -269,13 +221,11 @@ function UR:Update()
 
         yPos = yPos + HEADER_HEIGHT + HEADER_GAP
 
-        -- Position and show each visible buff row
         for i, row in ipairs(visibleBuffs) do
             row:ClearAllPoints()
             row:SetPoint("TOPLEFT", self.anchor, "TOPLEFT", 0, -yPos - ((i - 1) * (ROW_HEIGHT + ROW_GAP)))
             row:SetPoint("RIGHT", self.anchor, "RIGHT", 0, 0)
 
-            -- Re-stripe alternating background based on visible position
             if i % 2 == 0 then
                 row.bg:SetVertexColor(1, 1, 1, 0.03)
             else
@@ -289,13 +239,9 @@ function UR:Update()
         yPos = yPos + #visibleBuffs * (ROW_HEIGHT + ROW_GAP)
     end
 
-    -- 6. Resize container to fit actual content
     self.anchor:SetHeight(math.max(yPos, 1))
 end
 
-------------------------------------------------------------------------
--- Apply covered/uncovered visual state to a single row
-------------------------------------------------------------------------
 function UR:ApplyRowState(row)
     local covered = State:IsUtilityCovered(row.utilKey)
     local contributors = State:GetUtilityContributors(row.utilKey)
@@ -319,9 +265,6 @@ function UR:ApplyRowState(row)
     self:UpdateContributorIcons(row, contributors)
 end
 
-------------------------------------------------------------------------
--- Position contributor spec icons inline
-------------------------------------------------------------------------
 function UR:UpdateContributorIcons(row, contributors)
     local statusWidth = row.status:GetStringWidth() + 8
     local spacing = 1

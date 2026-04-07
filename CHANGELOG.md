@@ -6,6 +6,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-04-07
+
+### Changed
+- Full codebase comment cleanup: removed all development-era commentary,
+  redundant section banners, narration comments, and historical patch notes
+  from source files across all 19 Lua files
+- Retained only technically necessary comments: WoW API quirks (GUID cache
+  immunity to unit-token reassignment, serialized `NotifyInspect` constraint,
+  `GetInspectSpecialization` stale cross-class data guard, spec role vs group
+  role assignment lag), structural notes, and the RaiderIOCompat mechanism
+  description
+- No behavior changes
+
 ## [1.0.3] - 2026-04-05
 
 ### Fixed

@@ -1,32 +1,21 @@
-------------------------------------------------------------------------
--- Utils/Constants.lua
--- Addon-wide constants: sizing, colors, enums, string keys.
--- No dependencies. Loaded first so every other file can reference these.
-------------------------------------------------------------------------
 local ADDON_NAME, NS = ...
 
 NS.CONSTANTS = {
-    -- Addon identity
     ADDON_NAME     = ADDON_NAME,
-    ADDON_VERSION  = "1.0.3",
+    ADDON_VERSION  = "1.0.4",
 
-    -- Role keys (match Blizzard role strings)
     ROLE_TANK    = "TANK",
     ROLE_HEALER  = "HEALER",
     ROLE_DAMAGER = "DAMAGER",
     ROLE_NONE    = "NONE",
 
-    --------------------------------------------------------------------
-    -- Utility category keys (active abilities the player uses)
-    --------------------------------------------------------------------
-    UTIL_BREZ       = "BREZ",
-    UTIL_BLOODLUST  = "BLOODLUST",
-    UTIL_INTERRUPT   = "INTERRUPT",
-    UTIL_STUN        = "STUN",
-    UTIL_DISPEL      = "DISPEL",
-    UTIL_SOOTHE      = "SOOTHE",
+    UTIL_BREZ      = "BREZ",
+    UTIL_BLOODLUST = "BLOODLUST",
+    UTIL_INTERRUPT = "INTERRUPT",
+    UTIL_STUN      = "STUN",
+    UTIL_DISPEL    = "DISPEL",
+    UTIL_SOOTHE    = "SOOTHE",
 
-    -- Display order for utility rows
     UTILITY_ORDER = {
         "BREZ",
         "BLOODLUST",
@@ -36,7 +25,6 @@ NS.CONSTANTS = {
         "SOOTHE",
     },
 
-    -- Human-readable labels
     UTILITY_LABELS = {
         BREZ       = "Battle Res",
         BLOODLUST  = "Bloodlust",
@@ -46,7 +34,6 @@ NS.CONSTANTS = {
         SOOTHE     = "Soothe",
     },
 
-    -- Representative icon textures (Blizzard file data IDs)
     UTILITY_ICONS = {
         BREZ       = 136080,  -- Spell_Nature_Reincarnation
         BLOODLUST  = 135791,  -- Spell_Nature_BloodLust
@@ -56,10 +43,6 @@ NS.CONSTANTS = {
         SOOTHE     = 132163,  -- ability_druid_cower
     },
 
-    --------------------------------------------------------------------
-    -- Raid buff category keys (passive group-wide buffs from classes)
-    -- Matches TierCraft's tracked buff set for M+ compositions.
-    --------------------------------------------------------------------
     BUFF_ARCANE_INTELLECT       = "ARCANE_INTELLECT",
     BUFF_BATTLE_SHOUT           = "BATTLE_SHOUT",
     BUFF_FORTITUDE              = "FORTITUDE",
@@ -100,7 +83,6 @@ NS.CONSTANTS = {
         ATROPHIC_POISON        = "Atrophic Poison",
     },
 
-    -- Tooltip descriptions: what each buff actually does
     BUFF_DESCRIPTIONS = {
         ARCANE_INTELLECT       = "Increases Intellect for all party members",
         BATTLE_SHOUT           = "Increases Attack Power for all party members",
@@ -115,7 +97,6 @@ NS.CONSTANTS = {
         ATROPHIC_POISON        = "Reduces damage dealt by poisoned enemies",
     },
 
-    -- Which class provides each raid buff (for "missing" tooltip guidance)
     BUFF_SOURCES = {
         ARCANE_INTELLECT       = "Mage",
         BATTLE_SHOUT           = "Warrior",
@@ -130,25 +111,22 @@ NS.CONSTANTS = {
         ATROPHIC_POISON        = "Rogue",
     },
 
-    -- Static fallback icons (used only if runtime spell resolution fails)
+    -- Static fallback icons; overwritten at load time from C_Spell.GetSpellTexture().
     BUFF_ICONS = {
         ARCANE_INTELLECT       = 135932,  -- Spell_Holy_MagicalSentry
         BATTLE_SHOUT           = 132333,  -- Ability_Warrior_BattleShout
         FORTITUDE              = 135987,  -- Spell_Holy_WordFortitude
         MARK_OF_THE_WILD       = 136078,  -- Spell_Nature_Regeneration
-        MYSTIC_TOUCH           = 606551,  -- fallback; resolved at load
-        CHAOS_BRAND            = 1247264, -- fallback; resolved at load
-        HUNTERS_MARK           = 132212,  -- fallback; resolved at load
+        MYSTIC_TOUCH           = 606551,  -- resolved at load
+        CHAOS_BRAND            = 1247264, -- resolved at load
+        HUNTERS_MARK           = 132212,  -- resolved at load
         DEVOTION_AURA          = 135893,  -- Spell_Holy_DevotionAura
-        SKYFURY                = 135990,  -- fallback; resolved at load
-        BLESSING_OF_THE_BRONZE = 4630478, -- fallback; resolved at load
-        ATROPHIC_POISON        = 132290,  -- fallback; resolved at load
+        SKYFURY                = 135990,  -- resolved at load
+        BLESSING_OF_THE_BRONZE = 4630478, -- resolved at load
+        ATROPHIC_POISON        = 132290,  -- resolved at load
     },
 
-    -- Actual WoW spell IDs for each raid buff. Used at load time to
-    -- resolve the correct icon texture from the game's spell database
-    -- via C_Spell.GetSpellTexture(). This is self-correcting across
-    -- patches — if Blizzard changes an icon, the addon picks it up.
+    -- Spell IDs used to resolve current icons via C_Spell.GetSpellTexture() at load.
     BUFF_SPELL_IDS = {
         ARCANE_INTELLECT       = 1459,
         BATTLE_SHOUT           = 6673,
@@ -163,15 +141,11 @@ NS.CONSTANTS = {
         ATROPHIC_POISON        = 381637,
     },
 
-    --------------------------------------------------------------------
-    -- Window sizing
-    --------------------------------------------------------------------
     FRAME_DEFAULT_WIDTH  = 260,
     FRAME_DEFAULT_HEIGHT = 429,
 
-    -- Colors
-    COLOR_MISSING    = { r = 0.85, g = 0.25, b = 0.25 },  -- red
-    COLOR_HEADER     = { r = 1.00, g = 0.82, b = 0.00 },  -- gold
-    COLOR_TEXT        = { r = 0.90, g = 0.90, b = 0.90 },
-    COLOR_DIM         = { r = 0.50, g = 0.50, b = 0.50 },
+    COLOR_MISSING = { r = 0.85, g = 0.25, b = 0.25 },
+    COLOR_HEADER  = { r = 1.00, g = 0.82, b = 0.00 },
+    COLOR_TEXT    = { r = 0.90, g = 0.90, b = 0.90 },
+    COLOR_DIM     = { r = 0.50, g = 0.50, b = 0.50 },
 }

@@ -1,15 +1,8 @@
-------------------------------------------------------------------------
--- Core/Init.lua
--- Addon entry point. ADDON_LOADED -> init chain. Slash commands.
-------------------------------------------------------------------------
 local ADDON_NAME, NS = ...
 
 LFGMythicPlus = NS
 NS.initialized = false
 
-------------------------------------------------------------------------
--- Boot
-------------------------------------------------------------------------
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("ADDON_LOADED")
 
@@ -19,9 +12,8 @@ loader:SetScript("OnEvent", function(self, _, loadedAddon)
 
     NS.SavedVariables:Initialize()
 
-    -- Resolve raid buff icons from WoW's spell database.
-    -- Must run before MainWindow:Initialize() so UtilityRows get
-    -- correct textures at frame creation time.
+    -- Resolve raid buff icons from the spell database before MainWindow:Initialize()
+    -- so UtilityRows receive correct textures at frame creation time.
     local C = NS.CONSTANTS
     if C.BUFF_SPELL_IDS then
         for key, spellID in pairs(C.BUFF_SPELL_IDS) do
@@ -38,20 +30,16 @@ loader:SetScript("OnEvent", function(self, _, loadedAddon)
         end
     end
 
-    -- Dynamically resolve all class/spec data from the live game client.
-    -- Two phases:
-    --   Phase 1: Update existing static specs with live icons/roles/tokens.
-    --   Phase 2: Discover new specs (e.g. DH Devourer) via class iteration.
-    -- Both phases handle struct-return APIs (WoW 12.0+) and multi-return.
     local CSD = NS.ClassSpecData
     local UM  = NS.UtilityMatrix
 
-    -- Phase 1: Refresh every spec already in CSD.Specs from live API data.
+    -- Phase 1: refresh existing static specs with live API data.
     if GetSpecializationInfoByID then
         for specID, info in pairs(CSD.Specs) do
             local a, b, _, d, e, f = GetSpecializationInfoByID(specID)
             local sName, sIcon, sRole, sClassFile
             if type(a) == "table" then
+                -- Struct return (WoW 12.0+)
                 sName      = a.name or a.specName
                 sIcon      = a.iconID or a.icon
                 sRole      = a.role
@@ -69,13 +57,11 @@ loader:SetScript("OnEvent", function(self, _, loadedAddon)
         end
     end
 
-    -- Phase 2: Walk every class/spec in the game to discover specs not in
-    -- our static table (e.g. DH Devourer added in Midnight).
+    -- Phase 2: walk every class/spec in the game to discover specs not in the static table.
     local numClasses = GetNumClasses and GetNumClasses() or 0
     for classID = 1, numClasses do
         local _, classFile = GetClassInfo(classID)
         if classFile then
-            -- Query number of specs (handle struct or number return)
             local numSpecs = 0
             local nsFn = C_SpecializationInfo and C_SpecializationInfo.GetNumSpecializationsForClassID
             if nsFn then
@@ -87,7 +73,6 @@ loader:SetScript("OnEvent", function(self, _, loadedAddon)
             end
 
             for specIndex = 1, numSpecs do
-                -- Query spec info (handle struct or multi-return)
                 local fn = (C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfoForClassID)
                             or GetSpecializationInfoForClassID
                 if fn then
@@ -106,19 +91,16 @@ loader:SetScript("OnEvent", function(self, _, loadedAddon)
                     end
 
                     if specID and not CSD.Specs[specID] then
-                        -- New spec discovered — add it and seed utilities
                         CSD.Specs[specID] = {
                             class = classFile,
                             name  = sName or ("Spec " .. specID),
                             role  = sRole or "DAMAGER",
                             icon  = (sIcon and sIcon ~= 0) and sIcon or 0,
                         }
-                        -- Seed UtilityMatrix from class-level guaranteed utilities
                         if UM and not UM.Matrix[specID] then
                             local seed = CSD:BuildClassUtilitySeed(classFile, specID)
                             if seed then UM.Matrix[specID] = seed end
                         end
-                        -- Ensure ClassColors entry
                         if not CSD.ClassColors[classFile] then
                             local rc = RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFile]
                             if rc then
@@ -137,7 +119,6 @@ loader:SetScript("OnEvent", function(self, _, loadedAddon)
         end
     end
 
-    -- Invalidate cached class utilities so they rebuild from fresh data
     UM.ClassUtilities = nil
 
     NS.Events:Initialize()

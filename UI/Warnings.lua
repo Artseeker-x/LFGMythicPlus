@@ -1,9 +1,3 @@
-------------------------------------------------------------------------
--- UI/Warnings.lua
--- Compact warning indicators for missing critical utilities (BREZ, BL).
--- Rendered as small red-tinted icons right-aligned on the "Utility
--- Coverage" header line. Tooltips explain what is missing.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local Warn = {}
@@ -23,9 +17,6 @@ local CRITICAL_UTILITIES = {
 
 Warn.indicators = {}
 
-------------------------------------------------------------------------
--- Initialize: create indicators anchored right-aligned on parent row
-------------------------------------------------------------------------
 function Warn:Initialize(parent, rightEdge)
     self.anchor = parent
 
@@ -33,7 +24,6 @@ function Warn:Initialize(parent, rightEdge)
         self.indicators[i] = self:CreateIndicator(parent, rightEdge, def, i)
     end
 
-    -- Pending-inspect text (subtle, bottom-right of main frame)
     local mainFrame = NS.MainWindow and NS.MainWindow.frame
     if mainFrame then
         local pending = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -45,33 +35,25 @@ function Warn:Initialize(parent, rightEdge)
     end
 end
 
-------------------------------------------------------------------------
--- Create a single indicator icon
-------------------------------------------------------------------------
 function Warn:CreateIndicator(parent, rightEdge, def, index)
     local btn = CreateFrame("Frame", nil, parent)
     btn:SetSize(INDICATOR_SIZE, INDICATOR_SIZE)
     btn:Hide()
 
-    -- Stack right-to-left from the right edge of the container
-    -- +2 vertical offset keeps indicators above the separator line
     btn:SetPoint("RIGHT", rightEdge, "RIGHT", -(4 + (index - 1) * (INDICATOR_SIZE + INDICATOR_GAP)), 2)
 
-    -- Icon texture
     local icon = btn:CreateTexture(nil, "ARTWORK")
     icon:SetAllPoints()
     icon:SetTexture(def.icon)
-    icon:SetVertexColor(0.9, 0.25, 0.25)  -- red tint when missing
+    icon:SetVertexColor(0.9, 0.25, 0.25)
     btn.icon = icon
 
-    -- Small red "x" overlay
     local xMark = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     xMark:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 2, -2)
     xMark:SetText("|cffee3333x|r")
     xMark:SetScale(0.8)
     btn.xMark = xMark
 
-    -- Tooltip
     btn:EnableMouse(true)
     btn:SetScript("OnEnter", function(frame)
         GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
@@ -85,9 +67,6 @@ function Warn:CreateIndicator(parent, rightEdge, def, index)
     return btn
 end
 
-------------------------------------------------------------------------
--- Update: show/hide indicators based on coverage state
-------------------------------------------------------------------------
 function Warn:Update()
     local showWarnings = SV:Get("showWarnings")
 

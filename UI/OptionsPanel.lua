@@ -1,43 +1,30 @@
-------------------------------------------------------------------------
--- UI/OptionsPanel.lua
--- Registers a panel in Blizzard's Settings > AddOns list.
--- Centered layout: keystone icon, title, separator, description.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local C = NS.CONSTANTS
 
 -- Challenge Mode keystone icon (fileDataID 525134).
--- FileDataIDs are the most reliable way to reference textures in modern
--- WoW — immune to path renames across patches.
+-- FileDataIDs are stable across patches; path-based texture references are not.
 local KEYSTONE_ICON = 525134
 local ICON_SIZE     = 64
 
-------------------------------------------------------------------------
--- Build the panel contents (called once on first show)
-------------------------------------------------------------------------
 local function InitPanel(self)
     if self.initialized then return end
     self.initialized = true
 
-    -- Keystone icon (centered at top)
     local icon = self:CreateTexture(nil, "ARTWORK")
     icon:SetSize(ICON_SIZE, ICON_SIZE)
     icon:SetPoint("TOP", self, "TOP", 0, -24)
     icon:SetTexture(KEYSTONE_ICON)
 
-    -- Title (centered below icon)
     local title = self:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", icon, "BOTTOM", 0, -10)
     title:SetText("LFG Mythic+")
     title:SetTextColor(C.COLOR_HEADER.r, C.COLOR_HEADER.g, C.COLOR_HEADER.b)
 
-    -- Version (centered below title, subdued)
     local version = self:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     version:SetPoint("TOP", title, "BOTTOM", 0, -4)
     version:SetText("v" .. C.ADDON_VERSION)
 
-    -- Separator line
     local sep = self:CreateTexture(nil, "ARTWORK")
     sep:SetTexture("Interface\\Buttons\\WHITE8x8")
     sep:SetVertexColor(0.35, 0.35, 0.45, 0.5)
@@ -45,7 +32,6 @@ local function InitPanel(self)
     sep:SetPoint("TOPLEFT", self, "TOPLEFT", 32, -130)
     sep:SetPoint("RIGHT", self, "RIGHT", -32, 0)
 
-    -- Description block (centered, readable line groups)
     local desc = self:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     desc:SetPoint("TOP", sep, "BOTTOM", 0, -16)
     desc:SetPoint("LEFT", self, "LEFT", 40, 0)
@@ -61,13 +47,11 @@ local function InitPanel(self)
         "the Blizzard Group Finder window."
     )
 
-    -- Commands section header
     local cmdHeader = self:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     cmdHeader:SetPoint("TOP", desc, "BOTTOM", 0, -20)
     cmdHeader:SetText("Slash Commands")
     cmdHeader:SetTextColor(C.COLOR_HEADER.r, C.COLOR_HEADER.g, C.COLOR_HEADER.b, 0.8)
 
-    -- Commands list (centered, monospace-feel)
     local cmds = self:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     cmds:SetPoint("TOP", cmdHeader, "BOTTOM", 0, -8)
     cmds:SetJustifyH("CENTER")
@@ -80,9 +64,6 @@ local function InitPanel(self)
     cmds:SetTextColor(0.7, 0.7, 0.7)
 end
 
-------------------------------------------------------------------------
--- Register with the modern Settings API (retail 10.0+)
-------------------------------------------------------------------------
 if Settings and Settings.RegisterCanvasLayoutCategory then
     local panel = CreateFrame("Frame")
     panel.name = C.ADDON_NAME

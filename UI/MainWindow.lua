@@ -1,9 +1,3 @@
-------------------------------------------------------------------------
--- UI/MainWindow.lua
--- Companion panel permanently anchored to PVEFrame.
--- Lifecycle is driven entirely by LFGBridge — shows/hides with PVEFrame.
--- Delegates rendering to Layout.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local MW = {}
@@ -13,9 +7,6 @@ local C = NS.CONSTANTS
 
 MW.frame = nil
 
-------------------------------------------------------------------------
--- Create the main frame
-------------------------------------------------------------------------
 function MW:Initialize()
     if self.frame then return end
 
@@ -26,7 +17,6 @@ function MW:Initialize()
     f:SetSize(C.FRAME_DEFAULT_WIDTH, C.FRAME_DEFAULT_HEIGHT)
     f:Hide()
 
-    -- Backdrop
     f:SetBackdrop({
         bgFile   = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -39,7 +29,6 @@ function MW:Initialize()
 
     self.frame = f
 
-    -- Title bar background
     local titleBg = f:CreateTexture(nil, "ARTWORK")
     titleBg:SetTexture("Interface\\Buttons\\WHITE8x8")
     titleBg:SetVertexColor(0.10, 0.10, 0.16, 0.98)
@@ -48,29 +37,22 @@ function MW:Initialize()
     titleBg:SetPoint("TOPRIGHT", f, "TOPRIGHT", -3, -3)
     self.titleBg = titleBg
 
-    -- Title text
     local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     title:SetPoint("CENTER", titleBg, "CENTER", 0, 0)
     title:SetText("LFG Mythic+")
     title:SetTextColor(C.COLOR_HEADER.r, C.COLOR_HEADER.g, C.COLOR_HEADER.b)
     self.titleText = title
 
-    -- Content container
     local content = CreateFrame("Frame", nil, f)
     content:SetPoint("TOPLEFT", f, "TOPLEFT", 6, -26)
     content:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 6)
     self.content = content
 
-    -- Initialize layout
     NS.Layout:Initialize(content)
 end
 
-------------------------------------------------------------------------
--- Anchor: always right of PVEFrame.
--- When Raider.IO is loaded, RaiderIOCompat redirects the Raider.IO
--- profile tooltip anchor to appear to the RIGHT of our frame instead
--- of overlapping it.  Our own position never changes.
-------------------------------------------------------------------------
+-- Anchored permanently to PVEFrame TOPRIGHT. RaiderIOCompat redirects the
+-- Raider.IO tooltip anchor to appear right of our frame instead of on top of it.
 function MW:AnchorToPVEFrame()
     local f = self.frame
     if not f or not PVEFrame then return end
@@ -78,9 +60,6 @@ function MW:AnchorToPVEFrame()
     f:SetPoint("TOPLEFT", PVEFrame, "TOPRIGHT", 4, 0)
 end
 
-------------------------------------------------------------------------
--- Show / Hide (driven by LFGBridge)
-------------------------------------------------------------------------
 function MW:Show()
     if not self.frame then return end
     self:AnchorToPVEFrame()
@@ -104,9 +83,6 @@ function MW:IsShown()
     return self.frame and self.frame:IsShown()
 end
 
-------------------------------------------------------------------------
--- Refresh
-------------------------------------------------------------------------
 function MW:Refresh()
     if not self:IsShown() then return end
     NS.Layout:Update()

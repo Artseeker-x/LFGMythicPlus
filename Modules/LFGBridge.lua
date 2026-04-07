@@ -1,17 +1,8 @@
-------------------------------------------------------------------------
--- Modules/LFGBridge.lua
--- Connects the companion panel to the Blizzard PVEFrame lifecycle.
--- Handles lazy loading of Blizzard_PVEUI and safe post-hooks.
--- The addon window is permanently anchored to PVEFrame.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local Bridge = {}
 NS.LFGBridge = Bridge
 
-------------------------------------------------------------------------
--- Initialize
-------------------------------------------------------------------------
 function Bridge:Initialize()
     if PVEFrame then
         self:HookPVEFrame()
@@ -28,9 +19,7 @@ function Bridge:Initialize()
     NS.Debug:Log("LFGBridge initialized")
 end
 
-------------------------------------------------------------------------
--- Hook PVEFrame show/hide (post-hooks only, no taint)
-------------------------------------------------------------------------
+-- Post-hooks only; HookScript never taints protected frames.
 function Bridge:HookPVEFrame()
     if self.hooked then return end
     self.hooked = true
@@ -43,17 +32,13 @@ function Bridge:HookPVEFrame()
         Bridge:OnLFGClosed()
     end)
 
-    -- Sync if already visible
-    if PVEFrame:IsShown() then
+    if PVEFrame:IsShown() then -- sync if already visible
         self:OnLFGOpened()
     end
 
     NS.Debug:Log("PVEFrame hooks installed")
 end
 
-------------------------------------------------------------------------
--- Handlers
-------------------------------------------------------------------------
 function Bridge:OnLFGOpened()
     if not NS.initialized then return end
     NS.GroupScanner:DoScan()

@@ -1,9 +1,3 @@
-------------------------------------------------------------------------
--- Core/State.lua
--- Holds the live group composition state: who is in each slot, their
--- class/spec, role, and aggregated utility + raid buff coverage.
--- Written to by GroupScanner + CompEvaluator. Read by UI renderers.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local C = NS.CONSTANTS
@@ -11,32 +5,15 @@ local C = NS.CONSTANTS
 local State = {}
 NS.State = State
 
-------------------------------------------------------------------------
--- The canonical group state table.
---
--- members[i] = {
---     unit, guid, name, classFile, specID, role, specInfo,
---     specPending  -- true if we requested inspect but haven't got data yet
--- }
---
--- utilities[KEY] = {
---     covered      = true/false,
---     contributors = { { name, classFile, specID }, ... }
--- }
--- (covers both utility keys like BREZ and buff keys like ARCANE_INTELLECT)
---
--- roleCounts = { TANK = n, HEALER = n, DAMAGER = n }
--- memberCount = total members scanned
-------------------------------------------------------------------------
+-- members[i] = { unit, guid, name, classFile, specID, role, specInfo, specPending }
+-- utilities[KEY] = { covered, contributors = { { name, classFile, specID }, ... } }
+-- roleCounts = { TANK, HEALER, DAMAGER }
 State.members     = {}
 State.utilities   = {}
 State.roleCounts  = { TANK = 0, HEALER = 0, DAMAGER = 0 }
 State.memberCount = 0
 State.dirty       = false
 
-------------------------------------------------------------------------
--- Clear all state (called at the start of each scan)
-------------------------------------------------------------------------
 function State:Clear()
     wipe(self.members)
     wipe(self.utilities)
@@ -47,17 +24,11 @@ function State:Clear()
     self.dirty = true
 end
 
-------------------------------------------------------------------------
--- Member management
-------------------------------------------------------------------------
 function State:SetMember(index, data)
     self.members[index] = data
     self.dirty = true
 end
 
-------------------------------------------------------------------------
--- Role counts — called by GroupScanner after all members are scanned
-------------------------------------------------------------------------
 function State:ComputeRoleCounts()
     self.roleCounts.TANK    = 0
     self.roleCounts.HEALER  = 0
@@ -75,24 +46,12 @@ function State:ComputeRoleCounts()
     end
 end
 
-------------------------------------------------------------------------
--- Utility + buff management — unified structure for all tracked keys.
--- Both UTILITY_ORDER and BUFF_ORDER keys are stored here.
-------------------------------------------------------------------------
 function State:ResetUtilities()
-    -- Initialize utility keys
     for _, key in ipairs(C.UTILITY_ORDER) do
-        self.utilities[key] = {
-            covered = false,
-            contributors = {},
-        }
+        self.utilities[key] = { covered = false, contributors = {} }
     end
-    -- Initialize raid buff keys
     for _, key in ipairs(C.BUFF_ORDER) do
-        self.utilities[key] = {
-            covered = false,
-            contributors = {},
-        }
+        self.utilities[key] = { covered = false, contributors = {} }
     end
     self.dirty = true
 end
@@ -110,9 +69,6 @@ function State:AddUtilityContributor(key, member)
     self.dirty = true
 end
 
-------------------------------------------------------------------------
--- Convenience accessors for UI
-------------------------------------------------------------------------
 function State:IsUtilityCovered(key)
     local u = self.utilities[key]
     return u and u.covered or false

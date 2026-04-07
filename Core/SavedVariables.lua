@@ -1,8 +1,3 @@
-------------------------------------------------------------------------
--- Core/SavedVariables.lua
--- Manages persistent settings in LFGMythicPlusDB.
--- Merges defaults on load. Includes a DB version for safe migration.
-------------------------------------------------------------------------
 local _, NS = ...
 
 local SV = {}
@@ -11,15 +6,10 @@ NS.SavedVariables = SV
 local DB_VERSION = 1
 
 local DEFAULTS = {
-    dbVersion       = DB_VERSION,
-
-    -- Behavior
-    showWarnings    = true,
+    dbVersion    = DB_VERSION,
+    showWarnings = true,
 }
 
-------------------------------------------------------------------------
--- Merge defaults (one level deep)
-------------------------------------------------------------------------
 local function MergeDefaults(saved, defaults)
     for k, v in pairs(defaults) do
         if saved[k] == nil then
@@ -28,11 +18,7 @@ local function MergeDefaults(saved, defaults)
     end
 end
 
-------------------------------------------------------------------------
--- Migration: run once per version bump
-------------------------------------------------------------------------
 local function Migrate(db)
-    -- Clean up legacy keys from earlier versions
     db.windowPoint    = nil
     db.windowRelPoint = nil
     db.windowX        = nil
@@ -40,13 +26,9 @@ local function Migrate(db)
     db.windowWidth    = nil
     db.windowHeight   = nil
     db.locked         = nil
-
     db.dbVersion = DB_VERSION
 end
 
-------------------------------------------------------------------------
--- Public API
-------------------------------------------------------------------------
 function SV:Initialize()
     if not LFGMythicPlusDB then
         LFGMythicPlusDB = {}
