@@ -41,9 +41,6 @@ if [ -z "$CF_FILE_ID" ] || [ "$CF_FILE_ID" = "null" ]; then
     CF_FILE_ID=$(echo "$CF_API_RESPONSE" | jq -r '.data[0].id // ""')
 fi
 
-echo "DEBUG: CF_FILE_ID='${CF_FILE_ID}'"
-echo "DEBUG: CF_API first 3 files: $(echo "$CF_API_RESPONSE" | jq -c '[.data[:3][] | {id, fileName, displayName}]')"
-
 # Build URLs — fall back to the addon page if file ID still unresolvable
 if [ -n "$CF_FILE_ID" ] && [ "$CF_FILE_ID" != "null" ]; then
     CF_URL="https://www.curseforge.com/wow/addons/lfg-mythic/files/${CF_FILE_ID}"
